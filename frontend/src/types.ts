@@ -5,3 +5,5 @@ export type Note = {
     tag: string;
     createdAt: string;
 }
+
+export type AuthMode = 'signin' | 'register';

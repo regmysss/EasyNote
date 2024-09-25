@@ -1,12 +1,15 @@
 import Routes from "./components/Routes"
+import NoteProvider from "./contexts/NoteContext"
 
 function App() {
   return (
-    <div
-      className="w-[800px] m-auto mt-2"
-    >
-      <Routes />
-    </div>
+    <NoteProvider>
+      <div
+        className="w-[800px] m-auto"
+      >
+        <Routes />
+      </div>
+    </NoteProvider>
   )
 }
 

@@ -1,15 +1,23 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import '../styles/modal.css'
+import { NoteContext } from '../contexts/NoteContext';
 
 type Props = {
     setShowModal: (showModal: boolean) => void;
-    addNote: (title: string, description: string, tag: string) => void;
 }
 
-const Modal = ({ setShowModal, addNote }: Props) => {
+const Modal = ({ setShowModal }: Props) => {
+    const { addNote } = useContext(NoteContext);
     const titleRef = useRef<HTMLInputElement>(null);
     const tagRef = useRef<HTMLInputElement>(null);
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+    function handleAddNote() {
+        if (!titleRef.current || !tagRef.current || !descriptionRef.current) return;
+
+        addNote(titleRef.current.value, descriptionRef.current.value, tagRef.current.value);
+        setShowModal(false);
+    }
 
     return (
         <div className="modal" onClick={() => setShowModal(false)}>
@@ -19,7 +27,7 @@ const Modal = ({ setShowModal, addNote }: Props) => {
                         <div>
                             <p className='font-bold text-xl'>Title</p>
                             <input
-                                className='outline-none bg-black/20 rounded-sm p-1'
+                                className='outline-none bg-black/20 rounded-sm p-1 focus:ring-2 focus:ring-green-700'
                                 type="text"
                                 ref={titleRef}
                             />
@@ -27,7 +35,7 @@ const Modal = ({ setShowModal, addNote }: Props) => {
                         <div>
                             <p className='font-bold text-xl'>Tag</p>
                             <input
-                                className='outline-none bg-black/20 rounded-sm p-1'
+                                className='outline-none bg-black/20 rounded-sm p-1 focus:ring-2 focus:ring-green-700'
                                 type="text"
                                 ref={tagRef}
                             />
@@ -35,7 +43,7 @@ const Modal = ({ setShowModal, addNote }: Props) => {
                     </div>
                     <div className='flex gap-2'>
                         <button
-                            onClick={() => { addNote(titleRef.current!.value, descriptionRef.current!.value, tagRef.current!.value) }}
+                            onClick={handleAddNote}
                             className='bg-green-700 w-14 h-7 rounded-sm font-medium'
                         >
                             Add
@@ -51,7 +59,7 @@ const Modal = ({ setShowModal, addNote }: Props) => {
                 <div className='mt-2'>
                     <p className='font-bold text-xl'>Description</p>
                     <textarea
-                        className='w-[700px] h-64 resize-none p-1 outline-none bg-black/20 rounded-sm'
+                        className='w-[700px] h-64 resize-none p-1 outline-none bg-black/20 rounded-sm focus:ring-2 focus:ring-green-700'
                         ref={descriptionRef}
                     />
                 </div>

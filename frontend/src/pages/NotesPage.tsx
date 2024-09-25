@@ -1,0 +1,80 @@
+import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Modal from "../components/Modal";
+import { Note } from "../types";
+import { NoteContext } from "../contexts/NoteContext";
+
+const Notes = () => {
+    const { notes, setNotes, deleteNote } = useContext(NoteContext);
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        const fetchNotes = async () => {
+            const response = await fetch('http://localhost:3000/notes');
+            const data = await response.json();
+            setNotes(data);
+        }
+
+        fetchNotes();
+    }, [setNotes]);
+
+    return (
+        <div className="mt-2">
+            <div className="flex justify-between items-end mb-4">
+                <Link to='/profile'>
+                    <div className="rounded-full size-14 overflow-hidden cursor-pointer">
+                        <img
+                            className="size-full object-cover"
+                            src="logo.jpg" alt="logo.jpg"
+                        />
+                    </div>
+                </Link>
+                <button
+                    className="bg-green-700 w-14 h-7 rounded-sm font-medium"
+                    onClick={() => setShowModal(true)}
+                >
+                    Add
+                </button>
+            </div>
+            {
+                notes && notes.length != 0
+                    ? <div className="columns-3">
+                        {
+                            notes.map((note: Note) => (
+                                <div
+                                    className="bg-white/20 mb-4 p-4 rounded-sm break-inside-avoid"
+                                    key={note.id}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-bold truncate">{note.title}</h2>
+                                        <button
+                                            className="flex items-center justify-center size-6"
+                                            onClick={() => deleteNote(note.id)}
+                                        >
+                                            <img
+                                                src="delete.png"
+                                                alt="delete.png"
+                                            />
+                                        </button>
+                                    </div>
+                                    <p className="my-4 break-words">{note.description}</p>
+                                    <p className="text-gray-300 text-sm">{note.tag} | {note.createdAt}</p>
+                                </div>
+                            ))
+                        }
+                    </div>
+                    : <div className="flex justify-center">
+                        <span className="text-xl font-bold">
+                            There is nothing here yet 🙁
+                        </span>
+                    </div>
+            }
+
+            {
+                showModal && <Modal setShowModal={setShowModal} />
+            }
+        </div >
+    );
+}
+
+export default Notes;
