@@ -8,11 +8,41 @@ const Notes = () => {
     const { notes, setNotes, deleteNote } = useContext(NoteContext);
     const [showModal, setShowModal] = useState(false);
 
+    function formatDate(date: string) {
+        const d = new Date(date);
+        const dateOptions = { day: 'numeric', month: 'long' } as Intl.DateTimeFormatOptions;
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false } as Intl.DateTimeFormatOptions;
+
+        const dateFormated = d.toLocaleDateString('en-GB', dateOptions);
+        const timeFormated = d.toLocaleTimeString('en-GB', timeOptions);
+
+        return `${dateFormated} ${timeFormated}`;
+    }
+
     useEffect(() => {
         const fetchNotes = async () => {
-            const response = await fetch('http://localhost:3000/notes');
-            const data = await response.json();
-            setNotes(data);
+            try {
+                const response = await fetch('http://localhost:3000/notes', {
+                    credentials: 'include',
+                });
+                const data = await response.json();
+
+                switch (response.status) {
+                    case 200:
+                        setNotes(data);
+                        break;
+                    case 401:
+                        console.log('Not authorized');
+                        break;
+                    case 500:
+                        console.log('Error fetching notes');
+                        break;
+                    default:
+                        console.log('Unexpected error');
+                }
+            } catch {
+                console.log('Technical error 😥.');
+            }
         }
 
         fetchNotes();
@@ -58,7 +88,7 @@ const Notes = () => {
                                         </button>
                                     </div>
                                     <p className="my-4 break-words">{note.description}</p>
-                                    <p className="text-gray-300 text-sm">{note.tag} | {note.createdAt}</p>
+                                    <p className="text-gray-300 text-sm">{note.tag} | {formatDate(note.createdAt)}</p>
                                 </div>
                             ))
                         }

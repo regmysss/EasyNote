@@ -4,55 +4,47 @@ import { Note } from "../types";
 type NoteContextType = {
     notes: Note[] | null;
     setNotes: React.Dispatch<React.SetStateAction<Note[] | null>>;
-    addNote: (title: string, description: string, tag: string) => void;
     deleteNote: (id: number) => void;
 };
 
 export const NoteContext = createContext<NoteContextType>({
     notes: null,
     setNotes: () => { },
-    addNote: () => { },
     deleteNote: () => { },
 });
-
-const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-];
 
 const NoteProvider = ({ children }: { children: React.ReactNode }) => {
     const [notes, setNotes] = useState<Note[] | null>(null);
 
-    function addNote(title: string, description: string, tag: string) {
-        const date = new Date();
+    async function deleteNote(id: number) {
+        if (!notes) return;
 
-        const newNote = {
-            id: Math.random(),
-            title,
-            tag,
-            description,
-            createdAt: `${months[date.getMonth()]} ${date.getDay()}, ${date.getFullYear()}`
+        try {
+            const response = await fetch(`http://localhost:3000/notesDelete/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            })
+
+            switch (response.status) {
+                case 200:
+                    setNotes(notes.filter(note => note.id !== id));
+                    break;
+                case 401:
+                    console.log('Not authorized');
+                    break;
+                case 404:
+                    console.log('Note not found');
+                    break;
+                default:
+                    console.log('Unexpected error');
+            }
+        } catch {
+            console.log('Technical error 😥.');
         }
-
-        setNotes((prevNotes: Note[] | null) => prevNotes ? [...prevNotes, newNote] : [newNote]);
-    }
-
-    function deleteNote(id: number) {
-        setNotes((prevNotes: Note[] | null) => prevNotes ? prevNotes.filter(note => note.id !== id) : null);
     }
 
     return (
-        <NoteContext.Provider value={{ notes, setNotes, addNote, deleteNote }}>
+        <NoteContext.Provider value={{ notes, setNotes, deleteNote }}>
             {children}
         </NoteContext.Provider>
     );

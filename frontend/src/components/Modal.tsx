@@ -7,16 +7,45 @@ type Props = {
 }
 
 const Modal = ({ setShowModal }: Props) => {
-    const { addNote } = useContext(NoteContext);
+    const { setNotes } = useContext(NoteContext);
     const titleRef = useRef<HTMLInputElement>(null);
     const tagRef = useRef<HTMLInputElement>(null);
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
-    function handleAddNote() {
+    async function handleAddNote() {
         if (!titleRef.current || !tagRef.current || !descriptionRef.current) return;
 
-        addNote(titleRef.current.value, descriptionRef.current.value, tagRef.current.value);
-        setShowModal(false);
+        const title = titleRef.current.value;
+        const tag = tagRef.current.value;
+        const description = descriptionRef.current.value;
+
+        try {
+            const response = await fetch('http://localhost:3000/notesCreate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, tag, description }),
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+            switch (response.status) {
+                case 201:
+                    setNotes(prevNotes => prevNotes ? [...prevNotes, data] : [data]);
+                    break;
+                case 401:
+                    console.log('Not authorized');
+                    break;
+                case 500:
+                    console.log('Error creating note');
+                    break;
+                default:
+                    console.log('Unexpected error');
+            }
+        } catch {
+            console.log('Technical error 😥.');
+        } finally {
+            setShowModal(false);
+        }
     }
 
     return (

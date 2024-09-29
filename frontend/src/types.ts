@@ -6,4 +6,4 @@ export type Note = {
     createdAt: string;
 }
 
-export type AuthMode = 'signin' | 'register';
+export type AuthMode = 'signin' | 'signup';
