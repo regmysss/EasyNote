@@ -1,53 +1,38 @@
 import { createContext, useEffect, useState } from "react";
 
 type AuthContextType = {
-    isAuthenticated: boolean;
     username: string | null;
     email: string | null;
+    avatar: string | null;
+    updateAuth: (username: string | null, email: string | null, avatar: string | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
-    isAuthenticated: false,
     username: null,
     email: null,
+    avatar: null,
+    updateAuth: () => { },
 });
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [username, setUsername] = useState<string | null>(null);
-    const [email, setEmail] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(localStorage.getItem('username') || null);
+    const [email, setEmail] = useState<string | null>(localStorage.getItem('email') || null);
+    const [avatar, setAvatar] = useState<string | null>(localStorage.getItem('avatar') || null);
 
     useEffect(() => {
-        const fetchAuth = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/auth/check', {
-                    credentials: 'include',
-                });
-                
-                const data = await response.json();
+        localStorage.setItem('username', username || '');
+        localStorage.setItem('email', email || '');
+        localStorage.setItem('avatar', avatar || '');
+    }, [username, email, avatar]);
 
-                switch (response.status) {
-                    case 200:
-                        setIsAuthenticated(true);
-                        setUsername(data.username);
-                        setEmail(data.email);
-                        break;
-                    case 401:
-                        console.log('Not authorized');
-                        break;
-                    default:
-                        console.log('Unexpected error');
-                }
-            } catch {
-                console.log('Technical error 😥.');
-            }
-        };
-
-        fetchAuth();
-    }, []);
+    function updateAuth(username: string | null, email: string | null, avatar: string | null) {
+        setUsername(username);
+        setEmail(email);
+        setAvatar(avatar);
+    }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, username, email }}>
+        <AuthContext.Provider value={{ username, email, avatar, updateAuth }}>
             {children}
         </AuthContext.Provider>
     );

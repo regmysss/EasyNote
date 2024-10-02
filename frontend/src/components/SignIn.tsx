@@ -1,7 +1,11 @@
-import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { FormEvent, useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const SingIn = () => {
+    const { updateAuth } = useContext(AuthContext);
+    const navegate = useNavigate();
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -17,9 +21,12 @@ const SingIn = () => {
                 credentials: 'include',
             });
 
+            const data = await response.json();
+
             switch (response.status) {
                 case 200:
-                    window.location.replace('/notes');
+                    updateAuth(username, data.email, data.avatar);
+                    navegate('/notes', { replace: true });
                     break;
                 case 400:
                     setError("Invalid username or password.");

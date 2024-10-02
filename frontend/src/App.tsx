@@ -6,11 +6,7 @@ function App() {
   return (
     <AuthProvider>
       <NoteProvider>
-        <div
-          className="w-[800px] m-auto"
-        >
-          <Routes />
-        </div>
+        <Routes />
       </NoteProvider>
     </AuthProvider>
   )

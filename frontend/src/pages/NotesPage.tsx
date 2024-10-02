@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import Modal from "../components/Modal";
 import { Note } from "../types";
 import { NoteContext } from "../contexts/NoteContext";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Notes = () => {
     const { notes, setNotes, deleteNote } = useContext(NoteContext);
+    const { avatar } = useContext(AuthContext);
     const [showModal, setShowModal] = useState(false);
 
     function formatDate(date: string) {
@@ -49,13 +51,13 @@ const Notes = () => {
     }, [setNotes]);
 
     return (
-        <div className="mt-2">
+        <div className="mt-2 w-[1000px] mx-auto">
             <div className="flex justify-between items-end mb-4">
                 <Link to='/profile'>
                     <div className="rounded-full size-14 overflow-hidden cursor-pointer">
                         <img
                             className="size-full object-cover"
-                            src="logo.jpg" alt="logo.jpg"
+                            src={avatar!} alt={avatar!}
                         />
                     </div>
                 </Link>

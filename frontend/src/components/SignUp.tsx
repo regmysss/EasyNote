@@ -1,17 +1,27 @@
 import { FormEvent, useState } from "react";
 
+const avatarList = [
+    "apple.jpg",
+    "banana.jpg",
+    "orange.jpg",
+    "strawberry.jpg",
+    "watermelon.jpg",
+    "pineapple.jpg",
+];
+
 const SignUp = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [avatar, setAvatar] = useState('apple.jpg');
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
         const response = await fetch('http://localhost:3000/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({ username, email, password, avatar }),
             credentials: 'include',
         });
 
@@ -68,6 +78,22 @@ const SignUp = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
+                </div>
+                <div>
+                    <p className="text-center mb-2 font-medium">Select your avatar</p>
+                    <div className="columns-3">
+                        {
+                            avatarList.map((item, index) => (
+                                <div
+                                    className={`rounded-full overflow-hidden mb-3 cursor-pointer ${avatar == item ? "outline outline-offset-2 outline-white" : ""}`}
+                                    key={index}
+                                    onClick={() => setAvatar(item)}
+                                >
+                                    <img src={item} alt={item} />
+                                </div>
+                            ))
+                        }
+                    </div>
                 </div>
                 <button
                     type="submit"

@@ -2,8 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { PrismaClient } from '@prisma/client';
-import { setCookie, getCookie } from 'hono/cookie';
-import { v4 as uuidv4 } from 'uuid';
+import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
 
 const app = new Hono();
 const prisma = new PrismaClient();
@@ -19,7 +18,7 @@ app.use(cors({
 app.get('/auth/check', async (c) => {
   const sessionId = getCookie(c, 'sessionId');
 
-  if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
+  if (!sessionId) return c.json({ authorized: false }, 401);
 
   const userId = SESSIONS[sessionId];
 
@@ -31,23 +30,24 @@ app.get('/auth/check', async (c) => {
     });
 
     if (user)
-      return c.json({ username: user.username, email: user.email }, 200);
+      return c.json({ username: user.username, email: user.email, avatar: user.avatar }, 200);
     else
-      return c.json({ message: 'User not found' }, 404);
+      return c.json({ authorized: false }, 404);
   } catch {
-    return c.json({ message: 'Error fetching user' }, 500);
+    return c.json({ authorized: false }, 500);
   }
 });
 
 app.post('/auth/signup', async (c) => {
-  const { username, email, password } = await c.req.json();
+  const { username, email, password, avatar } = await c.req.json();
 
   try {
     await prisma.user.create({
       data: {
         username: username,
         email: email,
-        password: password
+        password: password,
+        avatar: avatar
       }
     });
 
@@ -70,15 +70,38 @@ app.post('/auth/signin', async (c) => {
   if (!user) return c.json({ message: 'User not found' }, 404);
 
   if (username === user.username && password === user.password) {
-    const sessionId = uuidv4();
-    SESSIONS[sessionId] = user.id;
+    const sessionId = await prisma.session.create({
+      data: {
+        userId: user.id
+      }
+    });
 
-    setCookie(c, 'sessionId', sessionId, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 });
+    setCookie(c, 'sessionId', sessionId.id, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 });
 
-    return c.json({ message: 'Logged in successfully' }, 200);
+    return c.json({ email: user.email, avatar: user.avatar }, 200);
   }
   else
     return c.json({ message: 'Incorrect username or password' }, 400);
+});
+
+app.get('/auth/signout', async (c) => {
+  const sessionId = getCookie(c, 'sessionId');
+
+  if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
+
+  try {
+    await prisma.session.delete({
+      where: {
+        id: sessionId
+      }
+    });
+
+    deleteCookie(c, 'sessionId');
+
+    return c.json({ message: 'Signed out' }, 200);
+  } catch {
+    return c.json({ message: 'Error signing out' }, 500);
+  }
 });
 
 app.get('/notes', async (c) => {
@@ -86,12 +109,16 @@ app.get('/notes', async (c) => {
 
   if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
 
-  const userId = SESSIONS[sessionId];
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
 
   try {
     const notes = await prisma.note.findMany({
       where: {
-        userId: userId
+        userId: session!.userId
       }
     });
 
@@ -107,7 +134,11 @@ app.post('/notesCreate', async (c) => {
 
   const { title, description, tag } = await c.req.json();
 
-  const userId = SESSIONS[sessionId];
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
 
   try {
     const note = await prisma.note.create({
@@ -115,7 +146,7 @@ app.post('/notesCreate', async (c) => {
         title: title,
         description: description,
         tag: tag,
-        userId: userId
+        userId: session!.userId
       }
     })
 
@@ -130,14 +161,19 @@ app.delete('/notesDelete/:id', async (c) => {
   const sessionId = getCookie(c, 'sessionId');
   if (!sessionId) return c.json({ message: 'Not authorized' }, { status: 401 });
 
-  const userId = SESSIONS[sessionId];
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
+
   const id = c.req.param('id');
 
   try {
     await prisma.note.delete({
       where: {
         id: id,
-        userId: userId
+        userId: session!.userId
       }
     });
 

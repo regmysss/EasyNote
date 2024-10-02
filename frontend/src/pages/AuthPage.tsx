@@ -23,7 +23,7 @@ const Auth = () => {
         const url = new URL(window.location.href);
 
         url.searchParams.set('authMode', authMode);
-        window.history.pushState({}, '', url);
+        window.history.replaceState({}, '', url);
     }, [authMode]);
 
     return (
