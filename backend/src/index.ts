@@ -104,6 +104,90 @@ app.get('/auth/signout', async (c) => {
   }
 });
 
+app.post('/auth/update/username', async (c) => {
+  const sessionId = getCookie(c, 'sessionId');
+
+  if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
+  const { username } = await c.req.json();
+
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
+
+  try {
+    await prisma.user.update({
+      where: {
+        id: session!.userId
+      },
+      data: {
+        username: username
+      }
+    });
+
+    return c.json({ message: 'Username updated' }, 200);
+  } catch {
+    return c.json({ message: 'Error updating username' }, 500);
+  }
+});
+
+app.post('/auth/update/email', async (c) => {
+  const sessionId = getCookie(c, 'sessionId');
+
+  if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
+  const { email } = await c.req.json();
+
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
+
+  try {
+    await prisma.user.update({
+      where: {
+        id: session!.userId
+      },
+      data: {
+        email: email
+      }
+    });
+
+    return c.json({ message: 'Email updated' }, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({ message: 'Error updating email' }, 500);
+  }
+});
+
+app.delete('/auth/delete', async (c) => {
+  const sessionId = getCookie(c, 'sessionId');
+
+  if (!sessionId) return c.json({ message: 'Not authorized' }, 401);
+
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId
+    }
+  });
+
+  try {
+    await prisma.user.delete({
+      where: {
+        id: session!.userId
+      }
+    });
+
+    deleteCookie(c, 'sessionId');
+
+    return c.json({ message: 'Account deleted' }, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({ message: 'Error deleting account' }, 500);
+  }
+});
+
 app.get('/notes', async (c) => {
   const sessionId = getCookie(c, 'sessionId');
 

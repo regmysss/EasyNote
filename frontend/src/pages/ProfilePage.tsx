@@ -1,10 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ModalContext } from "../contexts/ModalContext";
+import Modal from "../components/Modal";
 
 const ProfilePage = () => {
+    const { username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount } = useContext(AuthContext);
+    const { isOpen, setOpen } = useContext(ModalContext);
     const navigate = useNavigate();
-    const { username, email, avatar, updateAuth } = useContext(AuthContext);
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const usernameRef = useRef<HTMLInputElement>(null);
@@ -74,7 +77,15 @@ const ProfilePage = () => {
                                 }
                             </button>
                             {isEditingUsername &&
-                                <button className="px-3 py-1 rounded-sm bg-green-700">
+                                <button
+                                    className="px-3 py-1 rounded-sm bg-green-700"
+                                    onClick={() => {
+                                        if (!usernameRef.current) return;
+
+                                        updateUsername(usernameRef.current.value);
+                                        setIsEditingUsername(!isEditingUsername);
+                                    }}
+                                >
                                     Save
                                 </button>
                             }
@@ -104,7 +115,15 @@ const ProfilePage = () => {
                                 }
                             </button>
                             {isEditingEmail &&
-                                <button className="px-3 py-1 rounded-sm bg-green-700">
+                                <button
+                                    className="px-3 py-1 rounded-sm bg-green-700"
+                                    onClick={() => {
+                                        if (!emailRef.current) return;
+
+                                        updateEmail(emailRef.current.value);
+                                        setIsEditingEmail(!isEditingEmail);
+                                    }}
+                                >
                                     Save
                                 </button>
                             }
@@ -112,8 +131,17 @@ const ProfilePage = () => {
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <button className="p-2 rounded-sm bg-green-700">Change password</button>
-                    <button className="p-2  rounded-sm bg-red-700">Delete an account</button>
+                    <button
+                        onClick={() => setOpen(true)}
+                        className="p-2 rounded-sm bg-green-700"
+                    >Change password
+                    </button>
+                    <button
+                        onClick={() => {
+                            deleteAccount();
+                            navigate('/');
+                        }}
+                        className="p-2  rounded-sm bg-red-700">Delete an account</button>
                     <button
                         onClick={signOut}
                         className="p-2 rounded-sm bg-white/40"
@@ -121,6 +149,51 @@ const ProfilePage = () => {
                     </button>
                 </div>
             </div>
+            {
+                isOpen &&
+                <Modal>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <p className="font-medium">Enter your current password</p>
+                            <input
+                                type="password"
+                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                            />
+                        </div>
+                        <div>
+                            <p className="font-medium">
+                                Enter your new password
+                            </p>
+                            <input
+                                type="password"
+                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                            />
+                        </div>
+                        <div>
+                            <p className="font-medium">
+                                Confirm your new password
+                            </p>
+                            <input
+                                type="password"
+                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                            />
+                        </div>
+                        <div className="flex justify-center items-center gap-3">
+                            <button
+                                className="py-2 w-2/6 rounded-sm bg-green-700"
+                            >
+                                Save
+                            </button>
+                            <button
+                                className="py-2 w-2/6 rounded-sm bg-red-700"
+                                onClick={() => setOpen(false)}
+                            >
+                                Cansel
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            }
         </div>
     );
 }
