@@ -5,13 +5,15 @@ import { ModalContext } from "../contexts/ModalContext";
 import Modal from "../components/Modal";
 
 const ProfilePage = () => {
-    const { username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount } = useContext(AuthContext);
+    const { username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount, updatePassword } = useContext(AuthContext);
     const { isOpen, setOpen } = useContext(ModalContext);
     const navigate = useNavigate();
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const usernameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+    const newPasswordRef = useRef<HTMLInputElement>(null);
 
     async function signOut() {
         try {
@@ -152,12 +154,14 @@ const ProfilePage = () => {
             {
                 isOpen &&
                 <Modal>
-                    <div className="flex flex-col gap-4">
+                    <form className="flex flex-col gap-6 m-2">
                         <div>
                             <p className="font-medium">Enter your current password</p>
                             <input
                                 type="password"
                                 className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                                required
+                                ref={passwordRef}
                             />
                         </div>
                         <div>
@@ -167,6 +171,9 @@ const ProfilePage = () => {
                             <input
                                 type="password"
                                 className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                                minLength={8}
+                                required
+                                ref={newPasswordRef}
                             />
                         </div>
                         <div>
@@ -176,11 +183,17 @@ const ProfilePage = () => {
                             <input
                                 type="password"
                                 className="outline-none rounded-sm bg-black/20 p-1 w-full"
+                                minLength={8}
+                                required
                             />
                         </div>
                         <div className="flex justify-center items-center gap-3">
                             <button
                                 className="py-2 w-2/6 rounded-sm bg-green-700"
+                                onClick={() => {
+                                    updatePassword(passwordRef.current!.value, newPasswordRef.current!.value)
+                                    setOpen(false)
+                                }}
                             >
                                 Save
                             </button>
@@ -191,7 +204,7 @@ const ProfilePage = () => {
                                 Cansel
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </Modal>
             }
         </div>

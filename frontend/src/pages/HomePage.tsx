@@ -19,9 +19,9 @@ const HomePage = () => {
                 navigate('/notes');
             }
             else
-                navigate('/auth?authMode=signin');
+                navigate('/auth/signin');
         } catch {
-            navigate('/auth?authMode=signin');
+            navigate('/auth/signin');
         }
     }
 
@@ -44,7 +44,7 @@ const HomePage = () => {
                         Keep your notes, plans, and to-dos all in one place.<br />Simple, convenient, and always within reach – EasyNote helps you stay organized and never miss a thing.
                     </p>
                 </div>
-                <Link to="/auth?authMode=signup">
+                <Link to="/auth/signup">
                     <span className="px-8 py-2 rounded-sm border-2 font-semibold text-xl">
                         Get started
                     </span>

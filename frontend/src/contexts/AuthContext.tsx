@@ -8,6 +8,7 @@ type AuthContextType = {
     updateUsername: (username: string) => void;
     updateEmail: (email: string) => void;
     deleteAccount: () => void;
+    updatePassword: (oldPassword: string, newPassword: string) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ export const AuthContext = createContext<AuthContextType>({
     updateUsername: () => { },
     updateEmail: () => { },
     deleteAccount: () => { },
+    updatePassword: () => { },
 });
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,6 +58,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+
     async function updateEmail(email: string) {
         try {
             const response = await fetch('http://localhost:3000/auth/update/email', {
@@ -75,6 +78,26 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    async function updatePassword(oldPassword: string, newPassword: string) {
+        try {
+            const response = await fetch('http://localhost:3000/auth/update/password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ oldPassword, newPassword }),
+            });
+
+            if (response.ok) {
+                console.log('Password updated');
+            }
+        } catch (error) {
+            console.error(error);
+            console.log('Failed to update password');
+        }
+    }
+
     async function deleteAccount() {
         try {
             const response = await fetch('http://localhost:3000/auth/delete', {
@@ -90,8 +113,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+
     return (
-        <AuthContext.Provider value={{ username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount }}>
+        <AuthContext.Provider value={{ username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount, updatePassword }}>
             {children}
         </AuthContext.Provider>
     );
