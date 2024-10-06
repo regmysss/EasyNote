@@ -1,25 +1,19 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-const avatarList = [
-    "apple.jpg",
-    "banana.jpg",
-    "orange.jpg",
-    "strawberry.jpg",
-    "watermelon.jpg",
-    "pineapple.jpg",
-];
+import { avatarArray } from "../assets/avatarArray";
+import Input from "../components/UI/Input";
+import { configSignUp } from "../Configs/FormConfigs";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [values, setValues] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        avatar: avatarArray[0]
+    });
     const [error, setError] = useState('');
-    const [avatar, setAvatar] = useState(avatarList[0]);
-
-
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
@@ -28,7 +22,12 @@ const SignUpPage = () => {
             const response = await fetch('http://localhost:3000/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password, avatar }),
+                body: JSON.stringify({
+                    username: values.username,
+                    email: values.email,
+                    password: values.password,
+                    avatar: values.avatar
+                }),
                 credentials: 'include',
             });
 
@@ -37,9 +36,6 @@ const SignUpPage = () => {
                     navigate('/auth/signin');
                     break;
                 case 400:
-                    setError("Invalid data.");
-                    break;
-                case 409:
                     setError("Username or email already in use.");
                     break;
                 default:
@@ -49,6 +45,10 @@ const SignUpPage = () => {
         } catch {
             setError("Technical error 😥.");
         }
+    }
+
+    function handleChange(e: FormEvent<HTMLInputElement>) {
+        setValues({ ...values, [e.currentTarget.name]: e.currentTarget.value });
     }
 
     return (
@@ -61,58 +61,21 @@ const SignUpPage = () => {
                     <h2 className="text-2xl font-bold text-center">Sign up</h2>
                 </div>
                 <div className="size-full flex flex-col gap-4 p-8">
-                    <div>
-                        <input
-                            className="outline-none rounded-sm bg-black/20 p-2 w-full"
-                            type="text"
-                            placeholder="Username"
-                            required
-                            minLength={4}
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <input
-                            className="outline-none rounded-sm bg-black/20 p-2 w-full"
-                            type="email"
-                            placeholder="Email"
-                            required
-                            minLength={4}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <input
-                            className="outline-none rounded-sm bg-black/20 p-2 w-full"
-                            type="password"
-                            placeholder="Password"
-                            minLength={8}
-                            value={password}
-                            required
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <input
-                            className="outline-none rounded-sm bg-black/20 p-2 w-full"
-                            type="password"
-                            placeholder="Comfirm password"
-                            minLength={8}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </div>
+                    {
+                        configSignUp.map((input, index) => {
+                            const props = input.name === 'confirmPassword' ? { ...input, pattern: values.password } : input;
+                            return <Input key={index} {...props} value={values[input.name as keyof typeof values]} onChange={handleChange} />
+                        })
+                    }
                     <div>
                         <p className="text-center mb-2 font-medium">Select your avatar</p>
                         <div className="columns-3">
                             {
-                                avatarList.map((item, index) => (
+                                avatarArray.map((item, index) => (
                                     <div
-                                        className={`rounded-full overflow-hidden mb-3 cursor-pointer ${avatar == item ? "outline outline-offset-2 outline-white" : ""}`}
+                                        className={`rounded-full overflow-hidden mb-3 cursor-pointer ${values.avatar == item ? "outline outline-offset-2 outline-white" : ""}`}
                                         key={index}
-                                        onClick={() => setAvatar(item)}
+                                        onClick={() => setValues({ ...values, avatar: item })}
                                     >
                                         <img src={"/" + item} alt={item} />
                                     </div>

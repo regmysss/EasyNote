@@ -3,17 +3,22 @@ import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ModalContext } from "../contexts/ModalContext";
 import Modal from "../components/Modal";
+import { configChangePassword } from "../Configs/FormConfigs";
+import Input from "../components/UI/Input";
 
 const ProfilePage = () => {
     const { username, email, avatar, updateAuth, updateUsername, updateEmail, deleteAccount, updatePassword } = useContext(AuthContext);
     const { isOpen, setOpen } = useContext(ModalContext);
-    const navigate = useNavigate();
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
+    const [valuesPassword, setValuesPassword] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const navigate = useNavigate();
     const usernameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
-    const passwordRef = useRef<HTMLInputElement>(null);
-    const newPasswordRef = useRef<HTMLInputElement>(null);
 
     async function signOut() {
         try {
@@ -42,6 +47,13 @@ const ProfilePage = () => {
 
         emailRef.current.focus();
     }, [isEditingEmail]);
+
+    function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+
+        updatePassword(valuesPassword.oldPassword, valuesPassword.newPassword);
+        setOpen(false);
+    }
 
     return (
         <div className="flex gap-4 mt-2 w-[1000px] mx-auto">
@@ -154,52 +166,33 @@ const ProfilePage = () => {
             {
                 isOpen &&
                 <Modal>
-                    <form className="flex flex-col gap-6 m-2">
-                        <div>
-                            <p className="font-medium">Enter your current password</p>
-                            <input
-                                type="password"
-                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
-                                required
-                                ref={passwordRef}
-                            />
-                        </div>
-                        <div>
-                            <p className="font-medium">
-                                Enter your new password
-                            </p>
-                            <input
-                                type="password"
-                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
-                                minLength={8}
-                                required
-                                ref={newPasswordRef}
-                            />
-                        </div>
-                        <div>
-                            <p className="font-medium">
-                                Confirm your new password
-                            </p>
-                            <input
-                                type="password"
-                                className="outline-none rounded-sm bg-black/20 p-1 w-full"
-                                minLength={8}
-                                required
-                            />
-                        </div>
+                    <form
+                        className="flex flex-col gap-6 m-2"
+                        onSubmit={handleSubmit}
+                    >
+                        {
+                            configChangePassword.map((input, index) => {
+                                const props = input.name === 'confirmPassword' ? { ...input, pattern: valuesPassword.newPassword } : input;
+
+                                return <Input
+                                    key={index}
+                                    {...props}
+                                    value={valuesPassword[input.name as keyof typeof valuesPassword]}
+                                    onChange={(e) => setValuesPassword({ ...valuesPassword, [input.name]: e.target.value })}
+                                />
+                            })
+                        }
                         <div className="flex justify-center items-center gap-3">
                             <button
+                                type="submit"
                                 className="py-2 w-2/6 rounded-sm bg-green-700"
-                                onClick={() => {
-                                    updatePassword(passwordRef.current!.value, newPasswordRef.current!.value)
-                                    setOpen(false)
-                                }}
                             >
                                 Save
                             </button>
                             <button
                                 className="py-2 w-2/6 rounded-sm bg-red-700"
                                 onClick={() => setOpen(false)}
+                                type="button"
                             >
                                 Cansel
                             </button>

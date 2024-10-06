@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { authRoutes } from './routes/authRoutes';
 import { noteRoutes } from './routes/noteRoutes';
+import { accountRoutes } from './routes/accountRoutes';
 
 const app = new Hono();
 
@@ -14,6 +15,8 @@ app.use(cors({
 }));
 
 authRoutes(app);
+
+accountRoutes(app);
 
 noteRoutes(app);
 

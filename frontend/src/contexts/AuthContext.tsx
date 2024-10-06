@@ -41,7 +41,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     async function updateUsername(username: string) {
         try {
-            const response = await fetch('http://localhost:3000/auth/update/username', {
+            const response = await fetch('http://localhost:3000/account/update/username', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     async function updateEmail(email: string) {
         try {
-            const response = await fetch('http://localhost:3000/auth/update/email', {
+            const response = await fetch('http://localhost:3000/account/update/email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     async function updatePassword(oldPassword: string, newPassword: string) {
         try {
-            const response = await fetch('http://localhost:3000/auth/update/password', {
+            const response = await fetch('http://localhost:3000/account/update/password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     async function deleteAccount() {
         try {
-            const response = await fetch('http://localhost:3000/auth/delete', {
+            const response = await fetch('http://localhost:3000/account/delete', {
                 method: 'DELETE',
                 credentials: 'include',
             });
