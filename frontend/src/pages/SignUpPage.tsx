@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { avatarArray } from "../assets/avatarArray";
 import Input from "../components/UI/Input";
-import { configSignUp } from "../Configs/FormConfigs";
+import { configSignUp } from "../configs/formConfigs";
 
 const SignUpPage = () => {
     const navigate = useNavigate();

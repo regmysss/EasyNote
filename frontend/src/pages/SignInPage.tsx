@@ -2,7 +2,7 @@ import { FormEvent, useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import Input from "../components/UI/Input";
-import { configSignIn } from "../Configs/FormConfigs";
+import { configSignIn } from "../configs/formConfigs";
 
 const SingInPage = () => {
     const { updateAuth } = useContext(AuthContext);

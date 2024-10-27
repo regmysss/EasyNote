@@ -3,7 +3,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ModalContext } from "../contexts/ModalContext";
 import Modal from "../components/Modal";
-import { configChangePassword } from "../Configs/FormConfigs";
+import { configChangePassword } from "../configs/formConfigs";
 import Input from "../components/UI/Input";
 
 const ProfilePage = () => {
